@@ -1719,7 +1719,7 @@ RMAPI Matrix MatrixScale(const float x, const float y, const float z)
 }
 
 // Get perspective projection matrix
-RMAPI Matrix MatrixFrustum(const double left, const double right, const double bottom, const double top, const double near, const double far)
+RMAPI Matrix MatrixFrustum(const double left, const double right, const double bottom, const double top, const double nearPlane, const double farPlane)
 {
     const float rl = (float)(right - left);
     const float tb = (float)(top - bottom);
