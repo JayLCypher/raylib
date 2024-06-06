@@ -1723,27 +1723,27 @@ RMAPI Matrix MatrixFrustum(const double left, const double right, const double b
 {
     const float rl = (float)(right - left);
     const float tb = (float)(top - bottom);
-    const float fn = (float)(far - near);
+    const float fn = (float)(farPlane - nearPlane);
 
     const Matrix result = {
-		.m0  = ((float)near * 2.0f) / rl,
+		.m0  = ((float)nearPlane * 2.0f) / rl,
 		.m1  = 0.0f,
 		.m2  = 0.0f,
 		.m3  = 0.0f,
 
 		.m4  = 0.0f,
-		.m5  = ((float)near * 2.0f) / tb,
+		.m5  = ((float)nearPlane * 2.0f) / tb,
 		.m6  = 0.0f,
 		.m7  = 0.0f,
 
 		.m8  = ((float)right + (float)left)   / rl,
 		.m9  = ((float)top   + (float)bottom) / tb,
-		.m10 = -((float)far  + (float)near)   / fn,
+		.m10 = -((float)farPlane  + (float)nearPlane) / fn,
 		.m11 = -1.0f,
 
 		.m12 = 0.0f,
 		.m13 = 0.0f,
-		.m14 = -((float)far * (float)near * 2.0f) / fn,
+		.m14 = -((float)farPlane * (float)nearPlane * 2.0f) / fn,
 		.m15 = 0.0f,
 	};
     return result;
