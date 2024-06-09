@@ -338,7 +338,7 @@ RMAPI Vector2 Vector2Normalize(const Vector2 v)
 {
     const float length = sqrtf((v.x*v.x) + (v.y*v.y));
 	Vector2 result = {0};
-	if (length > 0.0f) {
+	if (fabsf(length) > 0.0f) {
 		result.x = v.x / length;
 		result.y = v.y / length;
 	}
@@ -408,10 +408,10 @@ RMAPI Vector2 Vector2MoveTowards(const Vector2 v, const Vector2 target, const fl
     if ((value == 0.0f) || ((maxDistance >= 0.0f) && (value <= (maxDistance * maxDistance)))) { return target; }
 
     const float dist = sqrtf(value);
-
-    Vector2 result = { 0 };
-    result.x = v.x + (dx / dist * maxDistance);
-    result.y = v.y + (dy / dist * maxDistance);
+    const Vector2 result = {
+		.x = v.x + (dx / dist * maxDistance),
+		.y = v.y + (dy / dist * maxDistance),
+	};
     return result;
 }
 
@@ -435,7 +435,7 @@ RMAPI Vector2 Vector2ClampValue(const Vector2 v, const float min, const float ma
 {
     Vector2 result = v;
     float length = (v.x * v.x) + (v.y * v.y);
-    if (length > 0.0f)
+    if (fabsf(length) > 0.0f)
     {
         length = sqrtf(length);
 
@@ -668,7 +668,7 @@ RMAPI Vector3 Vector3Normalize(Vector3 v)
 {
     const float length = sqrtf(v.x*v.x + v.y*v.y + v.z*v.z);
 	Vector3 result = {0};
-	if (length > 0.0f) {
+	if (fabsf(length) > 0.0f) {
 		result.x = v.x / length;
 		result.y = v.y / length;
 		result.z = v.z / length;
@@ -723,28 +723,26 @@ RMAPI void Vector3OrthoNormalize_alt(Vector3 *v1, Vector3 *v2)
 RMAPI void Vector3OrthoNormalize(Vector3 *v1, Vector3 *v2)
 {
     // Vector3Normalize(*v1);
-    Vector3 v = *v1;
-    float length = sqrtf(v.x*v.x + v.y*v.y + v.z*v.z);
-    if (length > 0.0f) {
+    float length = sqrtf((v1->x * v1->x) + (v1->y * v1->y) + (v1->z * v1->z));
+    if (fabsf(length) > 0.0f) {
 		v1->x /= length;
 		v1->y /= length;
 		v1->z /= length;
 	}
 
-    // Vector3CrossProduct(*v1, *v2)
+    // Vector3CrossProduct(Vector3Normalize(*v1), *v2)
     Vector3 vn1 = { v1->y*v2->z - v1->z*v2->y, v1->z*v2->x - v1->x*v2->z, v1->x*v2->y - v1->y*v2->x };
 
     // Vector3Normalize(vn1);
-    v = vn1;
-    length = sqrtf(v.x*v.x + v.y*v.y + v.z*v.z);
-    if (length != 0.0f) {
+    length = sqrtf((vn1.x * vn1.x) + (vn1.y * vn1.y) + (vn1.z * vn1.z));
+    if (fabsf(length) > 0.0f) {
 		vn1.x /= length;
 		vn1.y /= length;
 		vn1.z /= length;
 	}
 
     // Vector3CrossProduct(vn1, *v1)
-	Vector3 vn2 = { (vn1.y * v1->z) - (vn1.z * v1->y), (vn1.z * v1->x) - (vn1.x * v1->z), (vn1.x * v1->y) - (vn1.y * v1->x) };
+	const Vector3 vn2 = { (vn1.y * v1->z) - (vn1.z * v1->y), (vn1.z * v1->x) - (vn1.x * v1->z), (vn1.x * v1->y) - (vn1.y * v1->x) };
     *v2 = vn2;
 }
 
@@ -805,18 +803,18 @@ RMAPI Vector3 Vector3RotateByAxisAngle(Vector3 v, Vector3 axis, float angle)
     // Ref.: https://en.wikipedia.org/w/index.php?title=Euler%E2%80%93Rodrigues_formula
 
     // Vector3Normalize(axis);
-    float length = sqrtf(axis.x*axis.x + axis.y*axis.y + axis.z*axis.z);
-    if (length == 0.0f) { length = 1.0f; }
-    float ilength = 1.0f/length;
-    axis.x *= ilength;
-    axis.y *= ilength;
-    axis.z *= ilength;
+    const float length = sqrtf((axis.x * axis.x) + (axis.y * axis.y) + (axis.z * axis.z));
+    if (fabsf(length) > 0.0f) {
+		axis.x /= length;
+		axis.y /= length;
+		axis.z /= length;
+	}
 
     angle /= 2.0f;
     float a = sinf(angle);
-    float b = axis.x*a;
-    float c = axis.y*a;
-    float d = axis.z*a;
+    const float b = (axis.x * a);
+    const float c = (axis.y * a);
+    const float d = (axis.z * a);
     a = cosf(angle);
     Vector3 w = { b, c, d };
 
@@ -837,7 +835,7 @@ RMAPI Vector3 Vector3RotateByAxisAngle(Vector3 v, Vector3 axis, float angle)
     wwv.y *= 2;
     wwv.z *= 2;
 
-	Vector3 result = {
+	const Vector3 result = {
 		.x = v.x + wv.x + wwv.x,
 		.y = v.y + wv.y + wwv.y,
 		.z = v.z + wv.z + wwv.z,
@@ -851,8 +849,9 @@ RMAPI Vector3 Vector3MoveTowards(Vector3 v, Vector3 target, float maxDistance)
     const float dx = target.x - v.x;
     const float dy = target.y - v.y;
     const float dz = target.z - v.z;
-    const float value = (dx*dx) + (dy*dy) + (dz*dz);
+    const float value = (dx * dx) + (dy * dy) + (dz * dz);
 
+	// NOTE: Should it be ((maxDistance >= 0.0f) && (maxDistance < value) && (value <= maxDistance * maxDistance))?
     if ((value == 0.0f) || ((maxDistance >= 0.0f) && (value <= maxDistance*maxDistance))) {return target;}
 
     const float dist = sqrtf(value);
@@ -1066,10 +1065,15 @@ RMAPI float3 Vector3ToFloatV(const Vector3 v)
 RMAPI Vector3 Vector3Invert(const Vector3 v)
 {
 	Vector3 result = {0};
-	if (v.x != 0.0f && v.y != 0.0f && v.z != 0.0f) { return result; }
-	result.x = 1.0f / v.x;
-	result.y = 1.0f / v.y;
-	result.z = 1.0f / v.z;
+	const float x = 1.0f / v.x;
+	if (isnan(x)) { return result; }
+	const float y = 1.0f / v.y;
+	if (isnan(y)) { return result; }
+	const float z = 1.0f / v.z;
+	if (isnan(z)) { return result; }
+	result.x = x;
+	result.y = y;
+	result.z = z;
 	return result;
 }
 
@@ -1087,7 +1091,7 @@ RMAPI Vector3 Vector3ClampValue(const Vector3 v, const float min, const float ma
     Vector3 result = v;
 
     float length = (v.x * v.x) + (v.y * v.y) + (v.z * v.z);
-    if (length > 0.0f)
+    if (fabsf(length) > 0.0f)
     {
         length = sqrtf(length);
 
@@ -1267,7 +1271,7 @@ RMAPI Vector4 Vector4Normalize(const Vector4 v)
 {
 	Vector4 result = {0};
     const float length = sqrtf((v.x*v.x) + (v.y*v.y) + (v.z*v.z) + (v.w*v.w));
-	if (length > 0.0f) {
+	if (fabsf(length) > 0.0f) {
 		result.x = v.x / length;
 		result.y = v.y / length;
 		result.z = v.z / length;
@@ -1546,7 +1550,7 @@ RMAPI Matrix MatrixTranslate(const float x, const float y, const float z)
 RMAPI Matrix MatrixRotate(Vector3 axis, const float angle)
 {
     const float length = sqrtf((axis.x * axis.x) + (axis.y * axis.y) + (axis.z * axis.z));
-	if (length != 0.0f) {
+	if (fabsf(length) > 0.0f) {
 		axis.x /= length;
 		axis.y /= length;
 		axis.z /= length;
@@ -1813,7 +1817,7 @@ RMAPI Matrix MatrixLookAt(const Vector3 eye, const Vector3 target, const Vector3
     // Vector3Normalize(vz)
     Vector3 v = vz;
     float length = sqrtf(v.x*v.x + v.y*v.y + v.z*v.z);
-    if (length != 0.0f) {
+    if (fabsf(length) > 0.0f) {
 		vz.x /= length;
 		vz.y /= length;
 		vz.z /= length;
@@ -1825,7 +1829,7 @@ RMAPI Matrix MatrixLookAt(const Vector3 eye, const Vector3 target, const Vector3
     // Vector3Normalize(x)
     v = vx;
     length = sqrtf(v.x*v.x + v.y*v.y + v.z*v.z);
-    if (length != 0.0f) {
+    if (fabsf(length) > 0.0f) {
 		vx.x /= length;
 		vx.y /= length;
 		vx.z /= length;
@@ -1941,7 +1945,7 @@ RMAPI Quaternion QuaternionNormalize(const Quaternion q)
 {
 	Quaternion result = {0};
     const float length = sqrtf((q.x * q.x) + q.y*q.y + q.z*q.z + q.w*q.w);
-	if (length > 0.0f) {
+	if (fabsf(length) > 0.0f) {
 		result.x = q.x / length;
 		result.y = q.y / length;
 		result.z = q.z / length;
@@ -1955,7 +1959,7 @@ RMAPI Quaternion QuaternionInvert(Quaternion q)
 {
     Quaternion result = q;
     const float lengthSq = q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w;
-    if (lengthSq != 0.0f)
+    if (fabsf(lengthSq) > 0.0f)
     {
         const float invLength = 1.0f/lengthSq;
         result.x *= -invLength;
@@ -2021,16 +2025,14 @@ RMAPI Quaternion QuaternionNlerp(const Quaternion q1, const Quaternion q2, const
 	};
 
     // QuaternionNormalize(q);
-    float length = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
-	length = (length != 0.0f) ? length : 1.0f; // Here we could remove this line if we had access to the Elvis Operator :?
-	// float length = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w) :? 1.0f; // This would check and assign length on true.
-
-    const Quaternion result = {
-		.x = q.x / length,
-		.y = q.y / length,
-		.z = q.z / length,
-		.w = q.w / length,
-	};
+    const float length = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+    Quaternion result = {0};
+	if (fabsf(length) > 0.0f) {
+		result.x = q.x / length;
+		result.y = q.y / length;
+		result.z = q.z / length;
+		result.w = q.w / length;
+	}
     return result;
 }
 
@@ -2122,15 +2124,14 @@ RMAPI Quaternion QuaternionFromVector3ToVector3(const Vector3 from, const Vector
 
     // QuaternionNormalize(q);
     // NOTE: Normalize to essentially nlerp the original and identity to 0.5
-    float length = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
-	length = (length != 0.0f) ? length : 1.0f;
-
-    const Quaternion result = {
-		.x = q.x / length,
-		.y = q.y / length,
-		.z = q.z / length,
-		.w = q.w / length,
-	};
+    const float length = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+    Quaternion result = {0};
+	if (fabsf(length) > 0.0f) {
+		result.x = q.x / length;
+		result.y = q.y / length;
+		result.z = q.z / length;
+		result.w = q.w / length;
+	}
     return result;
 }
 
@@ -2235,16 +2236,15 @@ RMAPI Matrix QuaternionToMatrix(const Quaternion q)
 // NOTE: Angle must be provided in radians
 RMAPI Quaternion QuaternionFromAxisAngle(Vector3 axis, float angle)
 {
-    const float axisLength = sqrtf(axis.x*axis.x + axis.y*axis.y + axis.z*axis.z);
 
     Quaternion result = { 0.0f, 0.0f, 0.0f, 1.0f };
-    if (axisLength != 0.0f)
-    {
+    const float axisLength = sqrtf(axis.x*axis.x + axis.y*axis.y + axis.z*axis.z);
+    if (fabsf(axisLength) > 0.0f) {
         angle *= 0.5f;
 
         // Vector3Normalize(axis)
         float length = axisLength;
-        if (length != 0.0f) {
+        if (fabsf(length) > 0.0f) {
 			axis.x /= length;
 			axis.y /= length;
 			axis.z /= length;
@@ -2260,7 +2260,7 @@ RMAPI Quaternion QuaternionFromAxisAngle(Vector3 axis, float angle)
 
         // QuaternionNormalize(q);
         length = sqrtf(result.x*result.x + result.y*result.y + result.z*result.z + result.w*result.w);
-        if (length != 0.0f) {
+        if (fabsf(length) > 0.0f) {
 			result.x = result.x / length;
 			result.y = result.y / length;
 			result.z = result.z / length;
@@ -2274,11 +2274,10 @@ RMAPI Quaternion QuaternionFromAxisAngle(Vector3 axis, float angle)
 // Get the rotation angle and axis for a given quaternion
 RMAPI void QuaternionToAxisAngle(Quaternion q, Vector3 *outAxis, float *outAngle)
 {
-    if (fabsf(q.w) > 1.0f)
-    {
+    if (fabsf(q.w) > 1.0f) {
         // QuaternionNormalize(q);
         float length = sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
-        if (length != 0.0f) {
+        if (fabsf(length) > 0.0f) {
 			q.x /= length;
 			q.y /= length;
 			q.z /= length;
@@ -2319,7 +2318,7 @@ RMAPI Quaternion QuaternionFromEuler(const float pitch, const float yaw, const f
     const float z0 = cosf(roll*0.5f);
     const float z1 = sinf(roll*0.5f);
 
-    Quaternion result = {
+    const Quaternion result = {
 		.x = x1*y0*z0 - x0*y1*z1,
 		.y = x0*y1*z0 + x1*y0*z1,
 		.z = x0*y0*z1 - x1*y1*z0,

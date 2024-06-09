@@ -1598,10 +1598,10 @@ Vector2 GetScreenToWorld2D(Vector2 position, Camera2D camera)
 //double GetTime(void)
 
 // Set target FPS (maximum)
-void SetTargetFPS(int fps)
+void SetTargetFPS(unsigned fps)
 {
-    if (fps < 1) CORE.Time.target = 0.0;
-    else CORE.Time.target = 1.0/(double)fps;
+    if (fps < 1) { CORE.Time.target = 0.0; }
+    else { CORE.Time.target = 1.0/(double)fps; }
 
     TRACELOG(LOG_INFO, "TIMER: Target time per frame: %02.03f milliseconds", (float)CORE.Time.target*1000.0f);
 }

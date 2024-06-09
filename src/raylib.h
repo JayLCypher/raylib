@@ -198,9 +198,9 @@
 // Structures Definition
 //----------------------------------------------------------------------------------
 // Boolean type
-#if (defined(__STDC__) && __STDC_VERSION__ >= 199901L) || (defined(_MSC_VER) && _MSC_VER >= 1800)
+#if (defined(__STDC__) && __STDC_VERSION__ >= 199901L && __STDC_VERSION__ <= 201710L) || (defined(_MSC_VER) && _MSC_VER >= 1800)
     #include <stdbool.h>
-#elif !defined(__cplusplus) && !defined(bool)
+#elif !defined(__cplusplus) && !defined(bool) && __STDC_VERSION__ <= 201710L
     typedef enum bool { false = 0, true = !false } bool;
     #define RL_BOOL_TYPE
 #endif
@@ -1060,7 +1060,7 @@ RLAPI Matrix GetCameraMatrix(Camera camera);                            // Get c
 RLAPI Matrix GetCameraMatrix2D(Camera2D camera);                        // Get camera 2d transform matrix
 
 // Timing-related functions
-RLAPI void SetTargetFPS(int fps);                                 // Set target FPS (maximum)
+RLAPI void SetTargetFPS(unsigned fps);                                 // Set target FPS (maximum)
 RLAPI float GetFrameTime(void);                                   // Get time in seconds for last frame drawn (delta time)
 RLAPI double GetTime(void);                                       // Get elapsed time in seconds since InitWindow()
 RLAPI int GetFPS(void);                                           // Get current FPS
