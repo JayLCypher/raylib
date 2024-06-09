@@ -938,7 +938,7 @@
             <Param type="Camera2D" name="camera" desc="" />
         </Function>
         <Function name="SetTargetFPS" retType="void" paramCount="1" desc="Set target FPS (maximum)">
-            <Param type="int" name="fps" desc="" />
+            <Param type="unsigned" name="fps" desc="" />
         </Function>
         <Function name="GetFrameTime" retType="float" paramCount="0" desc="Get time in seconds for last frame drawn (delta time)">
         </Function>

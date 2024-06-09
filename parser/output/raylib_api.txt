@@ -1480,7 +1480,7 @@ Function 092: SetTargetFPS() (1 input parameters)
   Name: SetTargetFPS
   Return type: void
   Description: Set target FPS (maximum)
-  Param[1]: fps (type: int)
+  Param[1]: fps (type: unsigned)
 Function 093: GetFrameTime() (0 input parameters)
   Name: GetFrameTime
   Return type: float

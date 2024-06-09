@@ -3719,7 +3719,7 @@ return {
       description = "Set target FPS (maximum)",
       returnType = "void",
       params = {
-        {type = "int", name = "fps"}
+        {type = "unsigned", name = "fps"}
       }
     },
     {
